@@ -10,11 +10,6 @@ import (
 	"time"
 )
 
-func handleError(err error) {
-	fmt.Printf("Error %s", err)
-	os.Exit(1)
-}
-
 // Parses the incoming ftp connections command and returns
 // the command line argument and its value.
 func parseConnInput(input string, num int) (string, error) {
@@ -27,19 +22,19 @@ func parseConnInput(input string, num int) (string, error) {
 	return s, nil
 }
 
-type client struct {
-	c    net.Conn
-	dir  string
-	path string
-}
-
-// Main handling function for new connections. Handles responses and reads.
-func handleNewConnection(conn net.Conn, cmdMap map[string]interface{}) {
-	conn.Write(formatMsg(220, "Accepted Connection to FTP. Enjoy!"))
+// Handles input from new connection.
+func handleNewConnection(conn net.Conn) {
+	client := &client{
+		conn:   conn,
+		writer: bufio.NewWriter(conn),
+		dir:    "./file_directory",
+		login:  false,
+	}
 	conn.SetReadDeadline(time.Now().Add(2 * time.Minute))
 	defer conn.Close()
+	sendMessage(client, 220)
 	scanner := bufio.NewScanner(conn)
-	loggedIn := false
+	client.scanner = scanner
 	for scanner.Scan() {
 		if err := scanner.Err(); err != nil {
 			fmt.Fprintln(os.Stderr, "reading standard input:\r\n", err)
@@ -48,42 +43,15 @@ func handleNewConnection(conn net.Conn, cmdMap map[string]interface{}) {
 		text := scanner.Text()
 		cmd, _ := parseConnInput(text, 0)
 		fmt.Printf("%s\r\n", cmd)
-
-		if cmd == "quit" {
-			handleAccessCommandQuit(conn)
-			return
-		}
-
 		if len(text) == 0 {
-			conn.Write([]byte("Invalid command. \r\n"))
+			sendMessage(client, 500)
 			continue
 		}
-
-		if !loggedIn {
-			switch cmd {
-			case "user":
-				if len(text) > 5 {
-					arg, err := parseConnInput(text, 1)
-					if err != nil {
-						conn.Write(formatMsg(331, "FTP Server is Anonymous only"))
-						break
-					}
-					handleAccessCommandUser(conn, arg, loggedIn)
-				} else {
-					conn.Write(formatMsg(331, "FTP Server is Anonymous only"))
-				}
-			case "pass":
-				handleAccessCommandPass(conn, &loggedIn)
-			default:
-				conn.Write(formatMsg(530, "Please login with USER and Pass"))
-			}
+		val, ok := cmdMap[cmd]
+		if ok {
+			val(client)
 		} else {
-			switch cmd {
-			case "pasv":
-				setupPasvConnection(conn)
-			default:
-				conn.Write(formatMsg(500, "Unsupported command"))
-			}
+			sendMessage(client, 502)
 		}
 	}
 	fmt.Printf("Scanner decided to close.")
@@ -91,30 +59,25 @@ func handleNewConnection(conn net.Conn, cmdMap map[string]interface{}) {
 
 func main() {
 	if len(os.Args) != 2 {
-		handleError(errors.New("Invalid argument count"))
+		fmt.Printf("Invalid argument count")
+		os.Exit(1)
 	}
 	port := ":" + os.Args[1]
 	address, err := net.ResolveTCPAddr("tcp4", port)
 	if err != nil {
-		handleError(err)
+		fmt.Printf("Error %s", err)
+		os.Exit(1)
 	}
 	listener, err := net.ListenTCP("tcp", address)
-
 	defer listener.Close()
 	fmt.Printf("FTP server listening at port %s", port)
-	cmdMap := map[string]interface{}{
-		"quit": handleAccessCommandQuit{},
-		"user": handleAccessCommandUser{},
-		"pass": handleAccessCommandPass{},
-		"pasv": setupPasvConnection{},
-	}
 	for {
 		conn, err := listener.Accept()
 		if err != nil {
 			continue
 		}
 		if conn != nil {
-			go handleNewConnection(conn, cmdMap)
+			go handleNewConnection(conn)
 		}
 	}
 }

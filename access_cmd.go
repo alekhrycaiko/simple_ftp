@@ -6,52 +6,48 @@ import (
 	"net"
 )
 
-func handleAccessCommandUser(conn net.Conn, arg string, loggedIn bool) {
-	if arg == "anonymous" && !loggedIn {
-		conn.Write([]byte("331 Please specify the password.\r\n"))
-	} else if loggedIn {
-		conn.Write([]byte("331 Cannot change from anonymous user"))
+func handleAccessCommandUser(c *client) {
+	arg, _ := parseConnInput(c.scanner.Text(), 1)
+	fmt.Sprintf("%s\r\n", arg)
+	if arg == "anonymous" {
+		sendMessage(c, 331)
 	} else {
-		conn.Write([]byte("530 Anonymous only.\r\n"))
+		sendMessage(c, 530)
 	}
 }
 
-func handleAccessCommandPass(conn net.Conn, loggedIn *bool) {
-	if !*loggedIn {
-		conn.Write([]byte("230 Successful login.\r\n"))
-		*loggedIn = true
-	} else {
-		conn.Write([]byte("230 Already logged in.\r\n"))
-	}
+func handleAccessCommandPass(c *client) {
+	sendMessage(c, 230)
+	c.login = true
 }
 
-func handleAccessCommandQuit(conn net.Conn) {
-	conn.Write(formatMsg(221, "Quit Successful"))
-	conn.Close()
+func handleAccessCommandQuit(c *client) {
+	sendMessage(c, 221)
+	c.conn.Close()
 }
 
-func handlePasvConnection(conn net.Conn, pasvConn net.Conn) {
-	conn.Write(formatMsg(100, "Doing stuff "))
+func handlePasvConnection(c *client) {
 	// TODO: Handle what happens inside a PASV connection.
 }
 
-func setupPasvConnection(conn net.Conn) {
+func setupPasvConnection(c *client) {
 	port := rand.Int()%49151 + 1024
 	address := fmt.Sprintf("0.0.0.0:%d", port)
 	lstraddr, err := net.ResolveTCPAddr("tcp", address)
 	if err != nil {
-		conn.Write(formatMsg(500, "Invalid response"))
+		sendMessage(c, 500)
 		return
 	}
 	listener, err := net.ListenTCP("tcp", lstraddr)
 	msg := fmt.Sprintf("Connect to %s", address)
-	conn.Write(formatMsg(227, msg))
+	sendPasv(c, msg)
 	// TODO extended pasv:
 	for {
 		pasvConn, err := listener.Accept()
 		if err != nil {
-			defer conn.Close()
+			defer c.conn.Close()
 		}
-		go handlePasvConnection(conn, pasvConn)
+		c.pasv = pasvConn
+		go handlePasvConnection(c)
 	}
 }
