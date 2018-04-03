@@ -10,7 +10,7 @@ type client struct {
 	conn    net.Conn
 	writer  *bufio.Writer
 	scanner *bufio.Scanner
-	dir     string
+	path    []string
 	login   bool
 	pasv    net.Conn
 }

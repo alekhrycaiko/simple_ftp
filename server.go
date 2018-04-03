@@ -13,11 +13,13 @@ import (
 // Parses the incoming ftp connections command and returns
 // the command line argument and its value.
 func parseConnInput(input string, num int) (string, error) {
-	fmt.Printf("INPUT  IS %s", input)
 	if len(input) == 0 {
-		return "", errors.New("No arg")
+		return "", errors.New("No input")
 	}
 	words := strings.Fields(input)
+	if len(words) <= num {
+		return "", errors.New("No argument provided")
+	}
 	s := strings.ToLower(words[num])
 	return s, nil
 }
@@ -27,7 +29,7 @@ func handleNewConnection(conn net.Conn) {
 	client := &client{
 		conn:   conn,
 		writer: bufio.NewWriter(conn),
-		dir:    "./file_directory",
+		path:   []string{"."},
 		login:  false,
 	}
 	conn.SetReadDeadline(time.Now().Add(2 * time.Minute))
