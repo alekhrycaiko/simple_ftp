@@ -2,15 +2,12 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
-	"net"
 	"os"
 	"path"
 )
 
 func handleAccessCommandUser(c *client) {
-	arg, _ := parseConnInput(c.scanner.Text(), 1)
-	if arg == "anonymous" {
+	if len(c.input) >= 2 && c.input[1] == "anonymous" {
 		sendMessage(c, 331)
 	} else {
 		sendMessage(c, 530)
@@ -27,48 +24,17 @@ func handleAccessCommandQuit(c *client) {
 	c.conn.Close()
 }
 
-func handlePasvConnection(c *client) {
-	// TODO: Handle what happens inside a PASV connection.
-	sendMessage(c, 200)
-}
-
-func setupPasvConnection(c *client) {
-	port := rand.Int()%49151 + 1024
-	p1 := port & 0xff
-	p2 := (port >> 8) & 0xff
-	// TODO: Change the ip to be dynamic.
-	outAddr := fmt.Sprintf("0, 0, 0, 0, %d, %d", p1, p2)
-	address := fmt.Sprintf("0.0.0.0:%d", port)
-	lstraddr, err := net.ResolveTCPAddr("tcp", address)
-	if err != nil {
-		sendMessage(c, 500)
-		return
-	}
-	listener, err := net.ListenTCP("tcp", lstraddr)
-	msg := fmt.Sprintf("Connect to %s", outAddr)
-	sendPasv(c, msg)
-	for {
-		pasvConn, err := listener.Accept()
-		if err != nil {
-			defer c.conn.Close()
-		}
-		c.pasv = pasvConn
-		go handlePasvConnection(c)
-	}
-}
-
 /**
 * Changes the working directory.
  */
 func handleAccessCommandCwd(c *client) {
-	// check if cpath is valid.
-	arg, err := parseConnInput(c.scanner.Text(), 1)
-	if arg == "./" || arg == "../" {
-		sendMessage(c, 550)
+	if len(c.input) < 2 {
+		sendMessage(c, 500)
 		return
 	}
-	if err != nil {
-		sendMessage(c, 500)
+	arg := c.input[1]
+	if arg == "./" || arg == "../" {
+		sendMessage(c, 550)
 		return
 	}
 	if arg == ".." {

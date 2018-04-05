@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"errors"
 	"fmt"
 	"net"
 	"os"
@@ -12,16 +11,11 @@ import (
 
 // Parses the incoming ftp connections command and returns
 // the command line argument and its value.
-func parseConnInput(input string, num int) (string, error) {
-	if len(input) == 0 {
-		return "", errors.New("No input")
-	}
-	words := strings.Fields(input)
-	if len(words) <= num {
-		return "", errors.New("No argument provided")
-	}
-	s := strings.ToLower(words[num])
-	return s, nil
+func parseConnInput(input string) []string {
+	fmt.Println("P")
+	reader := bufio.NewReader(strings.NewReader(strings.Trim(input, " ")))
+	str, _ := reader.ReadString('\n')
+	return strings.Split(str, " ")
 }
 
 // Handles input from new connection.
@@ -31,6 +25,9 @@ func handleNewConnection(conn net.Conn) {
 		writer: bufio.NewWriter(conn),
 		path:   []string{"."},
 		login:  false,
+		ftype:  'A',
+		mode:   'S',
+		input:  []string{},
 	}
 	conn.SetReadDeadline(time.Now().Add(2 * time.Minute))
 	defer conn.Close()
@@ -38,21 +35,24 @@ func handleNewConnection(conn net.Conn) {
 	scanner := bufio.NewScanner(conn)
 	client.scanner = scanner
 	for scanner.Scan() {
+		fmt.Println("T")
 		if err := scanner.Err(); err != nil {
 			fmt.Fprintln(os.Stderr, "reading standard input:\r\n", err)
 			break
 		}
 		text := scanner.Text()
-		cmd, _ := parseConnInput(text, 0)
-		fmt.Printf("%s\r\n", cmd)
 		if len(text) == 0 {
 			sendMessage(client, 500)
 			continue
 		}
-		val, ok := cmdMap[cmd]
+		cmds := parseConnInput(text)
+		client.input = cmds
+		val, ok := cmdMap[cmds[0]]
 		if ok {
+			fmt.Println("O")
 			val(client)
 		} else {
+			fmt.Println("F")
 			sendMessage(client, 502)
 		}
 	}

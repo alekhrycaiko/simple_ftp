@@ -13,6 +13,9 @@ type client struct {
 	path    []string
 	login   bool
 	pasv    net.Conn
+	ftype   rune
+	mode    rune
+	input   []string
 }
 
 func sendMessage(client *client, code int) error {
@@ -29,7 +32,6 @@ func sendMessage(client *client, code int) error {
 	return nil
 }
 
-// TODO: re-factor this.
 func sendPasv(client *client, address string) {
 	msg := []byte(fmt.Sprintf("227 %s\r\n", address))
 	client.writer.Write(msg)
