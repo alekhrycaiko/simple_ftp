@@ -7,6 +7,7 @@ import (
 	"time"
 )
 
+// handleType provides support for the type command.
 func handleType(c *client) {
 	if len(c.input) < 2 {
 		sendMessage(c, 500)
@@ -22,12 +23,13 @@ func handleType(c *client) {
 	}
 }
 
+// getPassiveConn sets up passive connection listener on the given address.
 func getPassiveConn(c *client, lstraddr *net.TCPAddr) {
 	listener, err := net.ListenTCP("tcp", lstraddr)
 	if err != nil {
 		sendMessage(c, 500)
 	}
-	listener.SetDeadline(time.Now().Add(2 * time.Second))
+	listener.SetDeadline(time.Now().Add(2 * time.Minute))
 	defer listener.Close()
 	for {
 		pasvConn, err := listener.Accept()
@@ -42,6 +44,8 @@ func getPassiveConn(c *client, lstraddr *net.TCPAddr) {
 	}
 
 }
+
+// handlePasv sets up address to being called by the client.
 func handlePasv(c *client) {
 	port := rand.Int()%49151 + 1024
 	p1 := port & 0xff
@@ -60,7 +64,7 @@ func handlePasv(c *client) {
 	go getPassiveConn(c, lstraddr)
 }
 
-// Handles what mode we set the transfer to, for now only support stream.. nothing special going on here.
+// handleMode sets transfer mode. Currently always reports 200, as nothing special goes on here!
 func handleMode(c *client) {
 	sendMessage(c, 200)
 }

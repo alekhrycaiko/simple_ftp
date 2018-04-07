@@ -1,5 +1,6 @@
 package main
 
+// cmdMap acts as a map that points ftp command inputs to their functions.
 var cmdMap = map[string]func(*client){
 	"cwd":  handleCwd,
 	"cdup": handleCdup,
@@ -12,6 +13,8 @@ var cmdMap = map[string]func(*client){
 	"quit": handleQuit,
 	"user": handleUser,
 }
+
+// codeMap acts as a map that points status codes to their text outputs.
 var codeMap = map[int]string{
 	150: "Opened data conn",
 	200: "Okay",

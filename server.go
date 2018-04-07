@@ -9,8 +9,8 @@ import (
 	"time"
 )
 
-// Parses the incoming ftp connections command and returns
-// the command line argument and its value.
+// parseConnInput parses the incoming ftp connections command and returns
+// the command line arguments.
 func parseConnInput(input string) []string {
 	fmt.Println("P")
 	reader := bufio.NewReader(strings.NewReader(strings.Trim(input, " ")))
@@ -18,7 +18,7 @@ func parseConnInput(input string) []string {
 	return strings.Split(str, " ")
 }
 
-// Handles input from new connection.
+// handleNewConnection is the primary handler (main) for a new connection.
 func handleNewConnection(conn net.Conn) {
 	client := &client{
 		conn:   conn,

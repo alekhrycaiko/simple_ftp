@@ -6,6 +6,7 @@ import (
 	"path"
 )
 
+// handleUser will send a message back to the client based on input credentials.
 func handleUser(c *client) {
 	if len(c.input) >= 2 && c.input[1] == "anonymous" {
 		sendMessage(c, 331)
@@ -14,19 +15,21 @@ func handleUser(c *client) {
 	}
 }
 
+// handlePass will always succeed for client currently since we support anonymous mode.
+// no passwords are required for this server.
 func handlePass(c *client) {
 	sendMessage(c, 230)
 	c.login = true
 }
 
+// handleQuit will close the current tcp connection.
 func handleQuit(c *client) {
 	sendMessage(c, 221)
 	c.conn.Close()
 }
 
-/**
-* Changes the working directory.
- */
+// handleCwd changes the file directory of the client by pushing the given argument
+// if it produces a valid path.
 func handleCwd(c *client) {
 	if len(c.input) < 2 {
 		sendMessage(c, 500)
@@ -59,11 +62,8 @@ func handleCwd(c *client) {
 	return
 }
 
-/**
-* Moves path up. But not beyond the parent.
- */
+// handleCdup moves file directory up, if we're not already at the parent '.'.
 func handleCdup(c *client) {
-	// Set to 1 to ensure we always have a root folder as parent present in client path obj.
 	if len(c.path) == 1 {
 		sendMessage(c, 550)
 	} else {
