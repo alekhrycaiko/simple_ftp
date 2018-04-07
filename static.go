@@ -1,16 +1,16 @@
 package main
 
 var cmdMap = map[string]func(*client){
-	"cwd":  handleAccessCommandCwd,
-	"cdup": handleAccessCommandCdup,
-	"mode": handleTransferCommandMode,
-	"nlst": handleServiceCommandNlst,
-	"pass": handleAccessCommandPass,
-	"pasv": handleTransferCommandPasv,
-	"retr": handleServiceCommandRetr,
-	"type": handleTransferCommandType,
-	"quit": handleAccessCommandQuit,
-	"user": handleAccessCommandUser,
+	"cwd":  handleCwd,
+	"cdup": handleCdup,
+	"mode": handleMode,
+	"nlst": handleNlst,
+	"pass": handlePass,
+	"pasv": handlePasv,
+	"retr": handleRetr,
+	"type": handleType,
+	"quit": handleQuit,
+	"user": handleUser,
 }
 var codeMap = map[int]string{
 	150: "Opened data conn",

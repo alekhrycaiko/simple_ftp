@@ -4,15 +4,17 @@ import (
 	"fmt"
 	"math/rand"
 	"net"
+	"time"
 )
 
-func handleTransferCommandType(c *client) {
+func handleType(c *client) {
 	if len(c.input) < 2 {
 		sendMessage(c, 500)
 		return
 	}
 	arg := rune(c.input[1][0])
-	if arg == 'A' || arg == 'I' {
+	// Only supporting one mode currently.
+	if arg == 'A' {
 		c.ftype = arg
 		sendMessage(c, 200)
 	} else {
@@ -20,11 +22,30 @@ func handleTransferCommandType(c *client) {
 	}
 }
 
-func handleTransferCommandPasv(c *client) {
+func getPassiveConn(c *client, lstraddr *net.TCPAddr) {
+	listener, err := net.ListenTCP("tcp", lstraddr)
+	if err != nil {
+		sendMessage(c, 500)
+	}
+	listener.SetDeadline(time.Now().Add(2 * time.Second))
+	defer listener.Close()
+	for {
+		pasvConn, err := listener.Accept()
+		if err == err.(*net.OpError) {
+			sendMessage(c, 500)
+			break
+		} else if err != nil {
+			continue
+		}
+		c.pasv = pasvConn
+		break
+	}
+
+}
+func handlePasv(c *client) {
 	port := rand.Int()%49151 + 1024
 	p1 := port & 0xff
 	p2 := (port >> 8) & 0xff
-	// TODO: Change the ip to be dynamic.
 	outAddr := fmt.Sprintf("(0,0,0,0,%d,%d)", p1, p2)
 	fmt.Println(port)
 	address := fmt.Sprintf("0.0.0.0:%d", port)
@@ -34,25 +55,12 @@ func handleTransferCommandPasv(c *client) {
 		sendMessage(c, 500)
 		return
 	}
-	listener, err := net.ListenTCP("tcp", lstraddr)
-	if err != nil {
-		sendMessage(c, 500)
-	}
 	msg := fmt.Sprintf("Connect to %s", outAddr)
 	sendPasv(c, msg)
-	// TODO: set up a timeout.
-	for {
-		pasvConn, err := listener.Accept()
-		if err != nil {
-			continue
-		}
-		c.pasv = pasvConn
-		break
-	}
-	return
+	go getPassiveConn(c, lstraddr)
 }
 
-// Handles what mode we set the transfer to, for now only support stream.
-func handleTransferCommandMode(c *client) {
+// Handles what mode we set the transfer to, for now only support stream.. nothing special going on here.
+func handleMode(c *client) {
 	sendMessage(c, 200)
 }

@@ -12,7 +12,7 @@ import (
 	"path/filepath"
 )
 
-func handleServiceCommandRetr(c *client) {
+func handleRetr(c *client) {
 	if c.pasv == nil {
 		sendMessage(c, 425)
 		return
@@ -46,7 +46,7 @@ func handleServiceCommandRetr(c *client) {
 /**
 * Sends list of dir and files in present folder over pasv connection.
  */
-func handleServiceCommandNlst(c *client) {
+func handleNlst(c *client) {
 	if c.pasv == nil {
 		sendMessage(c, 425)
 		return

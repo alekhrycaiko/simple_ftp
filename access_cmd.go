@@ -6,7 +6,7 @@ import (
 	"path"
 )
 
-func handleAccessCommandUser(c *client) {
+func handleUser(c *client) {
 	if len(c.input) >= 2 && c.input[1] == "anonymous" {
 		sendMessage(c, 331)
 	} else {
@@ -14,12 +14,12 @@ func handleAccessCommandUser(c *client) {
 	}
 }
 
-func handleAccessCommandPass(c *client) {
+func handlePass(c *client) {
 	sendMessage(c, 230)
 	c.login = true
 }
 
-func handleAccessCommandQuit(c *client) {
+func handleQuit(c *client) {
 	sendMessage(c, 221)
 	c.conn.Close()
 }
@@ -27,7 +27,7 @@ func handleAccessCommandQuit(c *client) {
 /**
 * Changes the working directory.
  */
-func handleAccessCommandCwd(c *client) {
+func handleCwd(c *client) {
 	if len(c.input) < 2 {
 		sendMessage(c, 500)
 		return
@@ -38,7 +38,7 @@ func handleAccessCommandCwd(c *client) {
 		return
 	}
 	if arg == ".." {
-		handleAccessCommandCdup(c)
+		handleCdup(c)
 		return
 	}
 	tempPath := append(c.path, arg)
@@ -62,7 +62,7 @@ func handleAccessCommandCwd(c *client) {
 /**
 * Moves path up. But not beyond the parent.
  */
-func handleAccessCommandCdup(c *client) {
+func handleCdup(c *client) {
 	// Set to 1 to ensure we always have a root folder as parent present in client path obj.
 	if len(c.path) == 1 {
 		sendMessage(c, 550)

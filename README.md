@@ -1,27 +1,17 @@
-FTP Golang
+Simple Example FTP Server written in Go-lang
 
-Checklist: 
-Command line prompt.
-Command Line arguments > 2
-Open socket. 
-Listen to socket.
+Mostly written as a test app for Go-lang learning purposes.
 
-
-Commands:
+Currently supports the following commands:
 - PASV
 - RETR
-- STRU
-- STREAM
-- TYPE
-
-CURR:
-- NLST
-- DIR
 - CWD
-- MKD (new) [some security issues here… right? since anonymous]
-- 
-COMPLETED:
+- CDUP
 - USER
 - PASS
 - QUIT
+- TYPE
+- NLST
 
+Server supports passive mode and downloading of binary files
+Supports anonymous mode.
