@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"flag"
 	"fmt"
 	"net"
 	"os"
@@ -12,7 +13,6 @@ import (
 // parseConnInput parses the incoming ftp connections command and returns
 // the command line arguments.
 func parseConnInput(input string) []string {
-	fmt.Println("P")
 	reader := bufio.NewReader(strings.NewReader(strings.Trim(input, " ")))
 	str, _ := reader.ReadString('\n')
 	return strings.Split(str, " ")
@@ -64,7 +64,9 @@ func main() {
 		fmt.Printf("Invalid argument count")
 		os.Exit(1)
 	}
-	port := ":" + os.Args[1]
+	num := flag.String("port", "3000", "Port used")
+	flag.Parse()
+	port := ":" + *num
 	address, err := net.ResolveTCPAddr("tcp4", port)
 	if err != nil {
 		fmt.Printf("Error %s", err)

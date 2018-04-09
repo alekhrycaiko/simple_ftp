@@ -59,7 +59,6 @@ func handleCwd(c *client) {
 	default:
 		sendMessage(c, 550)
 	}
-	return
 }
 
 // handleCdup moves file directory up, if we're not already at the parent '.'.
