@@ -48,11 +48,11 @@ func handleNewConnection(conn net.Conn) {
 		cmds := parseConnInput(text)
 		client.input = cmds
 		val, ok := cmdMap[cmds[0]]
-		if ok {
-			fmt.Println("O")
+		if ok && client.login || (ok && !client.login && (cmds[0] == "user" || cmds[0] == "pass")) {
 			val(client)
+		} else if ok && !client.login {
+			sendMessage(client, 331)
 		} else {
-			fmt.Println("F")
 			sendMessage(client, 502)
 		}
 	}

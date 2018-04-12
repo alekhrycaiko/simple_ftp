@@ -9,6 +9,7 @@ import (
 // handleUser will send a message back to the client based on input credentials.
 func handleUser(c *client) {
 	if len(c.input) >= 2 && c.input[1] == "anonymous" {
+		c.login = true
 		sendMessage(c, 331)
 	} else {
 		sendMessage(c, 530)
@@ -19,7 +20,6 @@ func handleUser(c *client) {
 // no passwords are required for this server.
 func handlePass(c *client) {
 	sendMessage(c, 230)
-	c.login = true
 }
 
 // handleQuit will close the current tcp connection.

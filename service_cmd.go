@@ -69,3 +69,8 @@ func handleNlst(c *client) {
 	writer.Flush()
 	sendMessage(c, 226)
 }
+
+// Noop should do nothing but specify an okay.
+func handleNoop(c *client) {
+	sendMessage(c, 200)
+}

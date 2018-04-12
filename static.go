@@ -12,6 +12,7 @@ var cmdMap = map[string]func(*client){
 	"type": handleType,
 	"quit": handleQuit,
 	"user": handleUser,
+	"noop": handleNoop,
 }
 
 // codeMap acts as a map that points status codes to their text outputs.
