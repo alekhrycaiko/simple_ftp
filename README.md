@@ -5,18 +5,18 @@ Anonymous FTP server built in Go-lang; currently only supporting Passive mode.
 Built for fun and learning purposes :D 
 
 <h3> Commands supported </h3>
-<li> [x] PASV </li>
-<li> [x] RETR </li>
-<li> [x] CWD </li>
-<li> [x] CDUP </li>
-<li> [x] USER </li>
-<li> [x] PASS </li>
-<li> [x] QUIT </li>
-<li> [x] TYPE </li>
-<li> [x] NLST </li>
-<li> [ ] NOOP </li>
-<li> [ ] STOR </li>
-<li> [ ] PORT </li> 
+
+- [x] PASV
+- [x] RETR
+- [x] CWD
+- [x] CDUP
+- [x] USER
+- [x] PASS
+- [x] QUIT
+- [x] NLST
+- [ ] NOOP
+- [ ] STOR
+- [ ] PORT
 
 <h3> Example test flow: </h3>
 
