@@ -14,7 +14,7 @@ Built for fun and learning purposes :D
 - [x] PASS
 - [x] QUIT
 - [x] NLST
-- [ ] NOOP
+- [x] NOOP
 - [ ] STOR
 - [ ] PORT
 
