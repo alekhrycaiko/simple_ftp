@@ -56,7 +56,6 @@ func handleNewConnection(conn net.Conn) {
 			sendMessage(client, 502)
 		}
 	}
-	fmt.Printf("Scanner decided to close.")
 }
 
 func main() {
